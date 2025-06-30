@@ -39,6 +39,35 @@ try{
     res.status(400).send("Error fetching feed");
 }
 })
+
+app.delete("/user",async (req,res)=>{
+
+const userId= req.body.userId;
+try{
+    const user= await User.findByIdAndDelete(userId);
+    
+    res.send("User deleted successfully");
+}catch(err){
+    res.status(400).send("Error deleting user");
+}
+})
+
+// Update user by email
+app.patch("/user",async(req,res)=>{
+    const data =req.body;
+    const userId= req.body.userId;
+
+    try{
+ const user=   await User.findByIdAndUpdate({
+        _id:userId
+    },data,{returnDocument: 'after'});
+  //  console.log(user);
+    res.send("User updated successfully");
+    }catch(err){
+        res.status(400).send("Error updating user");
+    }
+
+})
 connectDB().then(()=>{
 console.log("Database connected successfully!");
 app.listen(3000,()=>{

@@ -53,11 +53,16 @@ try{
 })
 
 // Update user by email
-app.patch("/user",async(req,res)=>{
+app.patch("/user/:userId",async(req,res)=>{
     const data =req.body;
-    const userId= req.body.userId;
-
+    const userId= req.params?.userId;
+    
     try{
+         const ALLOWED_UPDATES= ["password","about","skills","gender"];
+    const isUpdateAllowed= Object.keys(data).every((update)=> ALLOWED_UPDATES.includes(update));
+    if(!isUpdateAllowed){
+        throw new Error("Update not allowed");
+    }
  const user=   await User.findByIdAndUpdate({
         _id:userId
     },data,{returnDocument: 'after',runValidators: true});

@@ -36,6 +36,15 @@ const userSchema= new mongoose.Schema({
     skills:{
         type:[String],
         default: [],
+        validate: {
+            validator: function(skills) {
+                if (skills.length < 1 || skills.length > 20) {
+                    throw new Error('Skills must have between 1 and 20 items');
+                }
+                return true;
+            },
+            message: 'Skills must have between 1 and 20 items'
+        }   
     },
     age:{
         type:Number,

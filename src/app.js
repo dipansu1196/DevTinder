@@ -2,6 +2,7 @@ const express= require('express');
 const bcrypt= require("bcrypt");
 const connectDB=require('./config/database');
 const app = express();
+const validator = require('validator');
 const User= require("./models/user");
 app.use(express.json()); //covert json object
 const { validateSignupData } = require("./utils/validation");
@@ -33,6 +34,27 @@ app.post("/signup", async (req,res)=>{
         res.status(400).send("Error adding user: " + err.message);
     }
    } )
+
+app.post("/login",async (req,res)=>{
+    try{
+        const {email,password}= req.body;
+        const user= await User.findOne({email:email});
+        if(!user){
+            return res.status(404).send("email not present in database");
+        }
+        if(validator.isEmail(email) === false){
+            return res.status(400).send("Email is not valid");
+        }
+        const isPasswordValid= await bcrypt.compare(password, user.password);
+        if(isPasswordValid){
+            res.send("Login successful");
+        } else {
+            return res.status(401).send("Invalid password Please Try Again");
+        }
+    }catch(err){
+        res.status(400).send("Error logging in: " + err.message);
+    }
+})
 // find user by email
 app.get("/user",async (req,res)=>{
     const email= req.body.email;

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 const userSchema= new mongoose.Schema({
     firstName:{
         type:String,
@@ -16,6 +17,11 @@ const userSchema= new mongoose.Schema({
         unique:true,
         lowercase:true,
         trim:true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Email is not valid: " + value);
+            }
+        }
         
     },
     password:{
@@ -23,10 +29,27 @@ const userSchema= new mongoose.Schema({
         required:true,
         minLength:8,
         maxLength:40,
+        validate(value){
+            if(!validator.isStrongPassword(value, {
+                minLength: 8,
+                minLowercase: 1,
+                minUppercase: 1,
+                minNumbers: 1,
+                minSymbols: 0
+            })){
+                throw new Error("Password is not strong enough");
+            }
+        }
         
     },
     photoUrl:{
-        type:String
+        type:String,
+        default:"https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error("Photo URL is not valid: " + value);
+            }
+        }
     },
     about:{
         type:String,

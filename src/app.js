@@ -4,8 +4,11 @@ const connectDB=require('./config/database');
 const app = express();
 const validator = require('validator');
 const User= require("./models/user");
-app.use(express.json()); //covert json object
+app.use(express.json());
+const cookieParser= require("cookie-parser") //covert json object
 const { validateSignupData } = require("./utils/validation");
+const jwt = require('jsonwebtoken');
+app.use(cookieParser());
 app.post("/signup", async (req,res)=>{
    
    
@@ -34,7 +37,27 @@ app.post("/signup", async (req,res)=>{
         res.status(400).send("Error adding user: " + err.message);
     }
    } )
+app.get("/profile", async(req,res)=>{
+ try{   const cookies= req.cookies;
+    const{token}= cookies;
+    if(!token){
+        return res.status(401).send("Unauthorized: No token provided");
+    }
+    const decodedMessage= await jwt.verify(token, "DEVTinder$790");
+    console.log(decodedMessage);
+    const{_id}= decodedMessage;
+    console.log("Logged In Use id is: ", _id);
+    console.log(cookies);
+    const user= await User.findById(_id);
+    if(!user){
+        return res.status(404).send("User not found");
+    }
+    res.send(user);}catch(err){
+        res.status(400).send("Error fetching profile: " + err.message);
+    }
+   
 
+})
 app.post("/login",async (req,res)=>{
     try{
         const {email,password}= req.body;
@@ -47,6 +70,13 @@ app.post("/login",async (req,res)=>{
         }
         const isPasswordValid= await bcrypt.compare(password, user.password);
         if(isPasswordValid){
+
+            //Create a JWT Token
+            const token = jwt.sign({_id:user._id}, "DEVTinder$790");
+            console.log(token);
+
+            // Add the token to cookie and send the response back to the user
+            res.cookie("token",token);
             res.send("Login successful");
         } else {
             return res.status(401).send("Invalid password Please Try Again");
@@ -121,12 +151,4 @@ app.listen(3000,()=>{
 })
 
 
-connectDB().then(()=>{
-console.log("Database connected successfully!");
-app.listen(3000,()=>{
-    console.log('Server is running on port 3000');
-});
-}).catch((err)=>{
-    console.log(err);
-})
 

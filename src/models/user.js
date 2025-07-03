@@ -88,7 +88,21 @@ const userSchema= new mongoose.Schema({
     timestamps:true,
     versionKey:false
 });
+userSchema.methods.getJWT= async function (){
+  const user= this;
+  const jwt= require('jsonwebtoken');
 
+  const token= jwt.sign({_id:user._id},"DEVTinder$790",{expiresIn:"1d"});
+  return token;
+
+
+}
+userSchema.methods.validatePassword= async function (passwordInputByUser){
+    const user= this;
+    const bcrypt= require('bcrypt');
+    const isPasswordValid= await bcrypt.compare(passwordInputByUser,user.password);
+    return isPasswordValid;
+}
 const User=mongoose.model('User',userSchema);
 module.exports= User;
 // This code defines a Mongoose schema for a User model in a Node.js application. The

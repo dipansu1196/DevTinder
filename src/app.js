@@ -61,9 +61,13 @@ app.post("/login",async (req,res)=>{
         if(validator.isEmail(email) === false){
             return res.status(400).send("Email is not valid");
         }
-        const isPasswordValid= await bcrypt.compare(password, user.password);
+        const isPasswordValid= await user.validatePassword(password);
+       
         if(isPasswordValid){
-            const token = jwt.sign({_id:user._id}, "DEVTinder$790");
+   // created a jwt token for the user
+            const token = await user.getJWT();
+            
+        
             res.cookie("token",token);
             res.send("Login successful");
         } else {

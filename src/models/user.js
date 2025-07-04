@@ -105,8 +105,8 @@ userSchema.methods.validatePassword= async function (passwordInputByUser){
     const isPasswordValid= await bcrypt.compare(passwordInputByUser,user.password);
     return isPasswordValid;
 }
-userSchema.index({email:1},{unique:true}); // Ensure email is unique
-userSchema.index({firstName:1, lastName:1}); // FIXED: Removed extra closing parenthesis
+ // Ensure email is unique
+ // FIXED: Removed extra closing parenthesis
 const User=mongoose.model('User',userSchema);
 module.exports= User;
 // This code defines a Mongoose schema for a User model in a Node.js application. The

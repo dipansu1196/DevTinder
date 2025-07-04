@@ -18,5 +18,14 @@ const validateSignupData = (data) => {
     else if(!validator.isEmail(email)){
         throw new Error("Email is invalid");
     }
+
+
 }
-module.exports={validateSignupData};
+const validateEditProfileData = (data) => {
+    const allowedEditfields = ['firstName', 'lastName', 'email', 'age', 'skills'];
+    const isEditAllowed= Object.keys(data).every((key) => allowedEditfields.includes(key));
+    if(!isEditAllowed){
+        throw new Error("Invalid fields for editing profile");
+    }
+}
+module.exports={validateSignupData,validateEditProfileData};

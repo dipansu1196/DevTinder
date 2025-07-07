@@ -28,6 +28,14 @@ userRouter.get("/user/requests/received",userAuth,async(req,res)=>{
 userRouter.get("/feed",userAuth,async(req,res)=>{
     try{
         const loggedInUser= req.user;
+        const page= parseInt(req.query.page) || 1; // ADDED: Pagination support
+        const limit= parseInt(req.query.limit) || 10;
+        if(limit>100){
+            limit=50;
+        }else{
+            limit=limit;
+        }
+        const skip= (page-1)*limit; // ADDED: Limit
         const connectionRequests= await ConnectionRequest.find({
             $or: [
                 { fromUserId: loggedInUser._id },
@@ -46,8 +54,8 @@ userRouter.get("/feed",userAuth,async(req,res)=>{
                 { _id: { $nin: Array.from(hideUsersFromFeed) } },
                 { _id: { $ne: loggedInUser._id } },
             ],
-        }).select("firstName lastName photoUrl about skills age"); // FIXED: Removed extra spaces and used single string format
-        
+        }).select("firstName lastName photoUrl about skills age").skip(skip).limit(limit); // FIXED: Added proper skip and limit values
+         
         res.json({
             message: "Feed users",
             data: users
